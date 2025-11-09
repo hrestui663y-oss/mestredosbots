@@ -4,55 +4,56 @@ const fetch = require('node-fetch');
 
 // === CONFIGURAÇÃO DO SERVIDOR MINECRAFT ===
 const bot = mineflayer.createBot({
-  host: 'survivalist7.aternos.me', // IP do seu servidor
-  port: 22286, // Porta do servidor
+  host: 'survivalist7.aternos.me', // IP do servidor
+  port: 22286, // Porta
   username: 'MestreDosBots', // Nome do bot
-  version: false // Versão automática
+  version: false // Detecta automaticamente
 });
 
 // === EVENTO: BOT ENTROU NO SERVIDOR ===
 bot.on('spawn', () => {
   console.log('🤖 MestreDosBots entrou no servidor!');
 
-  // Faz login automático
+  // Login ou registro automático
   setTimeout(() => {
+    bot.chat('/register tocommedo12 tocommedo12');
     bot.chat('/login tocommedo12');
-    console.log('🔐 Login automático enviado!');
+    console.log('🔐 Registro e login automáticos enviados!');
   }, 3000);
 
-  // Anti-AFK (movimenta o bot de tempos em tempos)
+  // Anti-AFK (se move pra não cair)
   setInterval(() => {
     bot.setControlState('forward', true);
     setTimeout(() => bot.setControlState('forward', false), 2000);
   }, 10000);
 });
 
-// === RESPONDE NO CHAT ===
+// === RESPONDE A MENSAGENS SIMPLES ===
 bot.on('chat', (username, message) => {
   if (username === bot.username) return;
-  if (message === 'oi bot') {
+  if (message.toLowerCase() === 'oi bot') {
     bot.chat(`Olá ${username}! 👋`);
   }
 });
 
-// === SE CAIR, TENTA RECONECTAR ===
+// === SE O BOT CAIR, REINICIA PRA VOLTAR ===
 bot.on('end', () => {
   console.log('❌ O bot caiu, tentando reconectar...');
-  setTimeout(() => process.exit(), 5000); // Render reinicia automaticamente
+  setTimeout(() => process.exit(), 5000);
 });
 
 // === CAPTURA ERROS ===
 bot.on('error', err => console.log('⚠️ Erro:', err));
 
-// === SERVIDOR EXPRESS (mantém o Render ativo) ===
+// === SERVIDOR EXPRESS PRA MANTER O RENDER ONLINE ===
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => res.send('🤖 Bot MestreDosBots está online!'));
 app.listen(PORT, () => console.log(`🌐 Servidor web ativo na porta ${PORT}`));
 
-// === MANTÉM O SITE ONLINE NO RENDER (ping a cada 10min) ===
+// === PING AUTOMÁTICO PRA O RENDER NÃO DORMIR ===
 setInterval(() => {
   fetch('https://mestredosbots.onrender.com')
-    .then(() => console.log('✅ Mantendo ativo...'))
+    .then(() => console.log('✅ Mantendo Render ativo...'))
     .catch(() => console.log('⚠️ Erro ao enviar ping.'));
-}, 600000); // 10 minutos
+}, 600000); // a cada 10 minutos
