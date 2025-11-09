@@ -2,66 +2,70 @@ const mineflayer = require('mineflayer');
 const express = require('express');
 const fetch = require('node-fetch');
 
-// === CONFIGURAÇÃO DO BOT ===
+// === CONFIGURAÇÃO DO SERVIDOR E BOT ===
+const SERVER_IP = 'rufouscrabhawk.aternos.host';
+const SERVER_PORT = 22286;
+const BOT_NAME = 'BotAFK2.0';
+const SENHA = 'tocommedo12';
+const SITE_URL = 'https://mestredosbots.onrender.com'; // seu site no Render
+
 let bot;
 
+// === FUNÇÃO DE CRIAÇÃO DO BOT ===
 function createBot() {
   bot = mineflayer.createBot({
-    host: 'rufouscrabhawk.aternos.host', // IP do servidor
-    port: 22286, // Porta
-    username: 'BotAFK2.0', // Nome do bot
+    host: SERVER_IP,
+    port: SERVER_PORT,
+    username: BOT_NAME,
     version: false // Detecta automaticamente
   });
 
-  // === QUANDO ENTRAR NO SERVIDOR ===
-  bot.on('spawn', () => {
+  bot.once('spawn', () => {
     console.log('🤖 BotAFK2.0 entrou no servidor!');
 
-    // Faz registro e login automáticos
+    // Aguardar alguns segundos antes de tentar login/registro
     setTimeout(() => {
-      bot.chat('/register tocommedo12 tocommedo12');
-      bot.chat('/login tocommedo12');
-      console.log('🔐 Registro e login automáticos enviados!');
-    }, 4000);
+      bot.chat(`/register ${SENHA} ${SENHA}`);
+      bot.chat(`/login ${SENHA}`);
+      console.log('🔐 Tentando registrar/login...');
+    }, 8000);
 
-    // Anti-AFK (anda de tempos em tempos)
+    // Anti-AFK: movimento leve a cada 20s
     setInterval(() => {
       bot.setControlState('forward', true);
       setTimeout(() => bot.setControlState('forward', false), 2000);
-    }, 15000);
+    }, 20000);
   });
 
-  // === RESPONDE AO CHAT ===
   bot.on('chat', (username, message) => {
     if (username === bot.username) return;
     if (message.toLowerCase() === 'oi bot') {
-      bot.chat(`Olá ${username}! 👋`);
+      bot.chat(`Olá ${username}! 👋 Estou ativo no servidor.`);
     }
   });
 
-  // === SE CAIR, RECONECTA AUTOMATICAMENTE ===
   bot.on('end', () => {
-    console.log('❌ O bot caiu, tentando reconectar...');
+    console.log('❌ O bot caiu! Tentando reconectar...');
     setTimeout(createBot, 10000);
   });
 
-  // === CAPTURA ERROS ===
-  bot.on('error', err => console.log('⚠️ Erro:', err));
+  bot.on('error', err => {
+    console.log('⚠️ Erro no bot:', err.message);
+  });
 }
 
-// Cria o bot inicial
+// Inicia o bot
 createBot();
 
-// === SERVIDOR WEB (Render mantém online) ===
+// === SERVIDOR WEB (mantém Render acordado) ===
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.get('/', (req, res) => res.send('🤖 BotAFK2.0 está online!'));
+app.listen(PORT, () => console.log(`🌍 Servidor web ativo na porta ${PORT}`));
 
-app.get('/', (req, res) => res.send('🤖 BotAFK2.0 está online e conectado!'));
-app.listen(PORT, () => console.log(`🌐 Servidor web ativo na porta ${PORT}`));
-
-// === PING AUTOMÁTICO PRA NÃO DORMIR ===
+// === PING AUTOMÁTICO ===
 setInterval(() => {
-  fetch('https://mestredosbots.onrender.com')
+  fetch(SITE_URL)
     .then(() => console.log('💓 Mantendo ativo no Render...'))
-    .catch(() => console.log('⚠️ Erro ao enviar ping.'));
-}, 12 * 60 * 1000); // a cada 12 minutos
+    .catch(() => console.log('⚠️ Falha ao enviar ping.'));
+}, 12 * 60 * 1000);
