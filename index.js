@@ -33,12 +33,13 @@ bot.on('error', err => console.log('Erro:', err));
 
 // Mantém servidor web ativo (Render precisa disso)
 const app = express();
+const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => res.send('🤖 Bot MestreDosBots está online!'));
-app.listen(3000, () => console.log('🌐 Servidor web ativo na porta 3000!'));
+app.listen(PORT, () => console.log(`🌐 Servidor web ativo na porta ${PORT}`));
 
-// Mantém online no Render (substitua depois pelo link do Render)
+// Mantém online no Render (ping periódico)
 setInterval(() => {
   fetch('https://mestredosbots.onrender.com')
-    .then(() => console.log('🔁 Mantendo ativo...'))
+    .then(() => console.log('📡 Mantendo ativo...'))
     .catch(() => console.log('⚠️ Erro ao enviar ping.'));
 }, 5 * 60 * 1000);
