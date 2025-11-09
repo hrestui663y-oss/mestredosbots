@@ -2,44 +2,59 @@ const mineflayer = require('mineflayer');
 const express = require('express');
 const fetch = require('node-fetch');
 
+// === CONFIGURAÇÕES DO BOT ===
 const bot = mineflayer.createBot({
-  host: 'survivalist7.aternos.me', // IP do seu servidor
-  port: 22286, // porta
-  username: 'MestreDosBots', // nome do bot
-  version: false // usa versão automática
+  host: 'survivalist7.aternos.me', // IP do servidor
+  port: 22286, // Porta do servidor
+  username: 'MestreDosBots', // Nome do bot
+  version: false // Detecta versão automaticamente
 });
 
-// Quando o bot entrar
+// === QUANDO O BOT ENTRAR NO SERVIDOR ===
 bot.on('spawn', () => {
   console.log('🤖 MestreDosBots entrou no servidor!');
+
+  // Anti-AFK: anda pra frente e para de tempos em tempos
+  setInterval(() => {
+    bot.setControlState('forward', true);
+    setTimeout(() => bot.setControlState('forward', false), 2000);
+  }, 10000);
 });
 
-// Responde no chat
+// === RESPOSTAS NO CHAT ===
 bot.on('chat', (username, message) => {
   if (username === bot.username) return;
-  if (message === 'oi bot') {
+  if (message.toLowerCase().includes('oi bot')) {
     bot.chat(`Olá ${username}! 👋`);
   }
 });
 
-// Se cair, tenta reconectar
+// === AUTO RECONEXÃO ===
 bot.on('end', () => {
   console.log('❌ O bot caiu, tentando reconectar...');
-  setTimeout(() => process.exit(), 5000);
+  setTimeout(() => {
+    process.exit(); // Reinicia o processo no Render
+  }, 5000);
 });
 
-// Captura erros
-bot.on('error', err => console.log('Erro:', err));
+// === CAPTURA DE ERROS ===
+bot.on('error', err => console.log('⚠️ Erro detectado:', err));
 
-// Mantém servidor web ativo (Render precisa disso)
+// === SERVIDOR WEB PARA O RENDER ===
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.get('/', (req, res) => res.send('🤖 Bot MestreDosBots está online!'));
-app.listen(PORT, () => console.log(`🌐 Servidor web ativo na porta ${PORT}`));
 
-// Mantém online no Render (ping periódico)
+app.get('/', (req, res) => {
+  res.send('🤖 Bot MestreDosBots está online e ativo!');
+});
+
+app.listen(PORT, () => {
+  console.log(`🌐 Servidor web ativo na porta ${PORT}`);
+});
+
+// === PING AUTOMÁTICO PARA O RENDER NÃO DORMIR ===
 setInterval(() => {
   fetch('https://mestredosbots.onrender.com')
-    .then(() => console.log('📡 Mantendo ativo...'))
+    .then(() => console.log('✅ Mantendo ativo no Render...'))
     .catch(() => console.log('⚠️ Erro ao enviar ping.'));
-}, 5 * 60 * 1000);
+}, 600000); // 10 minutos
